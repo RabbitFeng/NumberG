@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.rabbit.numberg.fragment.InputFragment;
+import com.rabbit.numberg.fragment.PickNumberFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -13,7 +13,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fl_container, new InputFragment())
+                .replace(R.id.fl_container, new PickNumberFragment())
                 .commitNow();
     }
 }

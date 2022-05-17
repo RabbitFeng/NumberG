@@ -1,4 +1,4 @@
-package com.rabbit.numberg.view;
+package com.rabbit.mylibrary;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -13,7 +13,6 @@ import android.view.ViewConfiguration;
 import android.view.animation.OvershootInterpolator;
 
 import androidx.annotation.IntDef;
-import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -77,6 +76,12 @@ public class CellView extends View {
     private float textHolderSize;
 
     /**
+     * 文字最大高度
+     */
+    private float maxTextHeight;
+
+
+    /**
      * 最小滑动距离
      */
     private float scaledTouchSlop;
@@ -115,6 +120,9 @@ public class CellView extends View {
         textPaintHolder = new TextPaint(textPaint);
         textPaintHolder.setTextSize(textHolderSize);
         textPaintHolder.setColor(Color.RED);
+
+        Paint.FontMetrics fontMetrics = textPaintHolder.getFontMetrics();
+        maxTextHeight = fontMetrics.bottom - fontMetrics.top;
     }
 
     private float paddingTop;
@@ -127,7 +135,8 @@ public class CellView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(measureWidth(widthMeasureSpec), measureHeight(heightMeasureSpec));
+        int length = Math.max(measureWidth(widthMeasureSpec), measureHeight(heightMeasureSpec));
+        setMeasuredDimension(length, length);
     }
 
     protected int measureWidth(int widthMeasureSpec) {
@@ -145,7 +154,7 @@ public class CellView extends View {
         int size = MeasureSpec.getSize(heightMeasureSpec);
         if (mode != MeasureSpec.EXACTLY) {
 //            size = (int) (radius * totalPoints + getPaddingTop() + getPaddingBottom());
-            size = 100;
+            size = (int) Math.max(100, maxTextHeight * 1.2);
         }
         return size;
     }
@@ -174,7 +183,7 @@ public class CellView extends View {
         } else if (state == STATE_HOLDER) {
             drawHolder(canvas);
         } else {
-            canvas.drawRect(-100, -100, 100, 100, linePaint);
+//            canvas.drawRect(-100, -100, 100, 100, linePaint);
         }
     }
 
@@ -201,9 +210,8 @@ public class CellView extends View {
         }
     }
 
-
     private void drawHolder(Canvas canvas) {
-        canvas.drawText(holderNumber + "", 0, 0, textPaintHolder);
+        canvas.drawText(holderNumber + "", 0, maxTextHeight / 3f, textPaintHolder);
     }
 
     private float dpToPx(float dp) {
@@ -214,16 +222,6 @@ public class CellView extends View {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, getResources().getDisplayMetrics());
     }
 
-    /**
-     * 设置状态
-     *
-     * @param state
-     */
-    @MainThread
-    public void setState(@State int state) {
-        this.state = state;
-        postInvalidate();
-    }
 
     private float xd;
     private float yd;
@@ -264,5 +262,44 @@ public class CellView extends View {
                             .start();
                 })
                 .start();
+    }
+
+    private int row = -1;
+    private int col = -1;
+
+    public void setPosition(int row, int col) {
+        this.row = row;
+        this.col = col;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getCol() {
+        return col;
+    }
+
+    public void setHoldNumber(int number) {
+        setState(STATE_HOLDER);
+        this.holderNumber = number;
+        postInvalidate();
+    }
+
+    public void setPossibleList(@NonNull ArrayList<Integer> list) {
+        setState(STATE_NOTE);
+        possibleList.clear();
+        possibleList.addAll(list);
+        postInvalidate();
+    }
+
+    /**
+     * 设置状态
+     *
+     * @param state
+     */
+    public void setState(@State int state) {
+        this.state = state;
+        postInvalidate();
     }
 }
