@@ -1,0 +1,3 @@
+rootProject.name = "Number G"
+include ':app'
+include ':mylibrary'
